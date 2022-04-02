@@ -1,0 +1,7 @@
+Create -> Schema (Collection)
+
+- AccountSchema
+- ServerSchema
+   - Chat
+   - Voice
+   - ListUser
