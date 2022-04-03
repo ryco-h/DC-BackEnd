@@ -28,8 +28,6 @@ route.post(`/`, async (req, res) => {
          res.status(400).send('Missing username or password!')
       }
 
-      // test
-
       const userAccount = await User
       .findOne({username: username})
       .populate({
