@@ -36,7 +36,7 @@ app.use(morgan('tiny'))
 app.use(function(req, res, next){
    req.io = io;
    res.header("Access-Control-Allow-Origin", "*");
-   res.header("Access-Control-Allow-Headers", "X-Requested-With");
+   res.header("Access-Control-Allow-Headers", "x-access-token");
 
    next();
 });

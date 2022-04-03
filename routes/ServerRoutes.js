@@ -6,7 +6,9 @@ const { TextChannel } = require('../models/TextChannelSchema')
 const { User } = require('../models/UserSchema')
 const route = express.Router()
 var bodyParser = require('body-parser')
- 
+const jwt = require("jsonwebtoken");
+const auth = require('../middleware/auth')
+
 // create application/json parser
 var jsonParser = bodyParser.json()
  
@@ -54,13 +56,36 @@ route.post(`/`, async (req, res) => {
       serverName: req.body.serverName,
       ownerId: req.body.ownerId,
       listUser: req.body.listUser,
-      textChannel: req.body.textChannel,
-      voiceChannel: req.body.voiceChannel 
+      voiceChannel: req.body.voiceChannel,
+      textChannel: req.body.textChannel
+   })
+   
+   let generalTextChannel = await TextChannel.create({
+
+      channelName: 'general',
+      serverId: server._id,
+      messages: []
    })
 
-   console.log(server)
    server = await server.save()
-   console.log(server)
+
+   if(server) {
+
+      server = await Server.findByIdAndUpdate(
+         server._id,
+         {
+            serverName: req.body.serverName,
+            ownerId: req.body.ownerId,
+            listUser: req.body.listUser,
+            voiceChannel: req.body.voiceChannel,
+            $push: {textChannel: generalTextChannel._id}
+         }, 
+         { new: true }
+      )
+
+      if(server) return res.status(200).send('Server created successfully!')
+   }
+   console.log(generalTextChannel)
 
    res.send(server)
 })
@@ -104,7 +129,7 @@ route.get(`/text-channel/message/:id`, async (req, res) => {
    res.send(listMessage)
 })
 
-route.delete(`/text-channel/:idTextChannel/:idMessage`, (req, res) => {
+route.delete(`/text-channel/:idTextChannel/:idMessage`, auth, (req, res) => {
 
    TextChannel.findById(req.params.idTextChannel, async (err, data) => {
       

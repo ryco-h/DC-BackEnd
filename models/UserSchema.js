@@ -9,6 +9,7 @@ const UserSchema = new mongoose.Schema({
       type: mongoose.Schema.Types.ObjectId,
       ref: 'server'
    }],
+   token: String
    // voiceActivity: {
    //    statusConnected: true,
    //    voiceChannel: 
