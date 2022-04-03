@@ -9,12 +9,6 @@ var bodyParser = require('body-parser')
 const jwt = require("jsonwebtoken");
 const auth = require('../middleware/auth')
 
-// create application/json parser
-var jsonParser = bodyParser.json()
- 
-// create application/x-www-form-urlencoded parser
-var urlencodedParser = bodyParser.urlencoded({ extended: false })
-
 // Server handler
 route.get('/', async (req, res) => {
 
