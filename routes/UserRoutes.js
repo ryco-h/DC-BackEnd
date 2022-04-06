@@ -19,7 +19,7 @@ route.get('/', async (req, res) => {
    res.send(user)
 })
 
-route.post(`/`, async (req, res) => {
+route.post(`/login`, async (req, res) => {
 
    try {
       const { username, password } = req.body
@@ -66,6 +66,7 @@ route.post(`/`, async (req, res) => {
          req.io.sockets.emit(
             "LogIn",
             {
+               userAccount_id: userAccount._id,
                token: token
             }
          )
@@ -78,7 +79,7 @@ route.post(`/`, async (req, res) => {
    }
 })
 
-route.get(`/login/:id`, async (req, res) => {
+route.get(`/:id`, auth, async (req, res) => {
     
    if (req.params.id === undefined) {
       res.status(500).json({
@@ -122,6 +123,35 @@ route.get(`/login/:id`, async (req, res) => {
          success: false,
          message: 'Invalid ID!'
       })
+   }
+})
+
+route.put(`/update-password/:id`, async (req, res) => {
+
+   try {
+
+      const {password} = req.body
+
+      const encryptedPassword = await bcrypt.hash(password, 12)
+
+      const newAccount = await User.findByIdAndUpdate(
+         req.params.id,
+         {
+            password: encryptedPassword
+         },
+         {
+            new: true
+         }
+      )
+
+      if(!newAccount) res.status(400).send({
+         success: false,
+         message: "Failed to update user data!"
+      })
+
+      res.send(newAccount)
+   } catch(error) {
+      console.log(error)
    }
 })
 

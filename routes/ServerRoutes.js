@@ -8,6 +8,18 @@ const route = express.Router()
 var bodyParser = require('body-parser')
 const jwt = require("jsonwebtoken");
 const auth = require('../middleware/auth')
+var atob = require('atob');
+
+function parseJWT(token) {
+
+   var base64Url = token.split('.')[1];
+   var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+   var jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+      return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+   }).join(''));
+
+   return JSON.parse(jsonPayload);
+}
 
 // Server handler
 route.get('/', async (req, res) => {
@@ -28,19 +40,59 @@ route.get('/', async (req, res) => {
    res.send(servers)
 }) 
 
-route.get('/:id', async (req, res) => {
+route.get('/:id', auth, async (req, res) => {
 
-   console.log(req.params.id)
-   const servers = await Server
-   .find({_id: req.params.id})
+   const user = parseJWT(req.body.token || req.query.token || req.headers["x-access-token"])
 
-   if(!servers) {
-      res.status(500).json({
-         success: false
+   // const servers = await Server
+   // .find({_id: req.params.id})
+   // .populate({
+   //    path: 'listUser',
+   //    populate: {
+   //       path: 'listServer',
+   //       select: 'id serverName'
+   //    }
+   // })
+   // .populate({
+   //    path: 'textChannel',
+   //    populate: 'messages'
+   // })
+   try {
+      Server.findById(req.params.id, async (err, data) => {
+         
+         if (data.listUser.map(user => user._id.toString()).includes(user.userAccount_id)) {
+            const servers = await Server
+            .find({_id: req.params.id})
+            .populate({
+               path: 'listUser',
+               populate: {
+                  path: 'listServer',
+                  select: 'id serverName'
+               }
+            })
+            .populate({
+               path: 'textChannel',
+               populate: {
+                  path: 'messages',
+                  populate: 'userId'
+               }
+            })
+
+            res.send(servers)
+         } else {
+            res.send("Access Denied!")
+         }
       })
+   } catch(error) {
+      res.send({status: 400, message: error})
    }
+   // if(!server) {
+   //    res.status(500).json({
+   //       success: false
+   //    })
+   // }
 
-   res.send(servers)
+   // res.send(server)
 })
 
 route.post(`/`, async (req, res) => {
