@@ -48,7 +48,7 @@ const UserRoutes = require('./routes/UserRoutes')
 app.use(`${api}/servers`, ServerRoutes)
 app.use(`${api}/users`, UserRoutes)
 
-mongoose.connect('mongodb+srv://Admin:admin@teamdev.1shrq.mongodb.net/myFirstDatabase?retryWrites=true&w=majority', {
+mongoose.connect('', {
    useNewUrlParser: true,
    useUnifiedTopology: true,
    dbName: 'TeamDev'
